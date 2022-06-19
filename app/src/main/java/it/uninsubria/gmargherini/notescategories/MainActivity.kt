@@ -2,14 +2,14 @@ package it.uninsubria.gmargherini.notescategories
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.*
-import androidx.core.view.marginEnd
-import androidx.core.view.setMargins
+import com.bumptech.glide.Glide
 import it.uninsubria.gmargherini.notescategories.databinding.ActivityMainBinding
-import it.uninsubria.gmargherini.notescategories.databinding.ListRowBinding
+import it.uninsubria.gmargherini.notescategories.databinding.AlertDialogBinding
 
 
 class MainActivity : AppCompatActivity() {
@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     private val dbh:DBHelper= DBHelper(this)
     private var notes:List<Note> = ArrayList()
     private var categories:List<String> = ArrayList()
+    private var currentCategory:String=""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //dbh.destroy()
@@ -25,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
         checkCategories()
         binding.floatingActionButton.setOnClickListener {
-            val editTexts= ListRowBinding.inflate(layoutInflater)
+            val editTexts= AlertDialogBinding.inflate(layoutInflater)
             var ad=AlertDialog.Builder(this)
                 .setTitle("Nuova nota")
                 .setView(editTexts.root)
@@ -39,7 +40,12 @@ class MainActivity : AppCompatActivity() {
                     dialog.cancel()
                 })
                 .show()
-
+        }
+        binding.listView.setOnItemClickListener { parent, view, pos, id ->
+            val intent=Intent(this,EditorActivity::class.java)
+            intent.putExtra("title",view.findViewById<TextView>(R.id.tv_title).text.toString())
+            intent.putExtra("category",currentCategory)
+            startActivity(intent)
         }
     }
     private fun checkCategories(){
@@ -59,6 +65,7 @@ class MainActivity : AppCompatActivity() {
                     button.text = i
                     button.setOnClickListener {
                         showNotes(i)
+                        currentCategory=i
                     }
                     binding.linearLayout.addView(button)
                 }
@@ -66,20 +73,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun showNotes(category:String){
-        val data=ArrayList<HashMap<String,Any>>()
-
         notes=dbh.readNotes(category)
-        if(notes.isNotEmpty()) {
-            for(i in notes.indices){
-                val item=HashMap<String,Any>()
-                item["title"]=notes[i].title
-                data.add(item)
-            }
-            binding.listView.adapter = SimpleAdapter(
-                this, data, android.R.layout.simple_list_item_2,
-                arrayOf("title"), intArrayOf(android.R.id.text1)
-            )
-            println(notes)
-        }
+        binding.listView.adapter=NotesListAdapter(this,notes)
     }
 }

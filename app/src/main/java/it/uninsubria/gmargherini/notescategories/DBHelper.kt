@@ -12,7 +12,6 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
         const val DATABASE_NAME: String="notesApp.db"
         const val DATABASE_VERSION: Int=1
         val TABLE_NOTES="Notes"
-        val COL_ID="id"
         val COL_TITLE="title"
         val COL_TEXT="text"
         val COL_IMAGE="image"
@@ -21,13 +20,13 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
 
     override fun onCreate(db: SQLiteDatabase?) {
         val createTableNotes=
-                "CREATE TABLE " + TABLE_NOTES + "("+
-                COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"+
+            "CREATE TABLE " + TABLE_NOTES + "("+
                 COL_TITLE + " VARCHAR(128)," +
                 COL_CATEGORY + " VARCHAR(128),"+
                 COL_TEXT + " TEXT,"+
-                COL_IMAGE + " BLOB"+
-                ")"
+                COL_IMAGE + " VARCHAR(256),"+
+                "PRIMARY KEY($COL_TITLE,$COL_CATEGORY)"+
+            ")"
         db?.execSQL(createTableNotes)
     }
 
@@ -42,7 +41,6 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
         val db=this.readableDatabase
         val query =  COL_CATEGORY+" = '"+category.lowercase()+"'"
         val cursor=db.query(TABLE_NOTES,null,query,null,null,null,null)
-        val idIndex=cursor.getColumnIndex(COL_ID)
         val titleIndex= cursor.getColumnIndex(COL_TITLE)
         val categoryIndex= cursor.getColumnIndex(COL_CATEGORY)
         val textIndex= cursor.getColumnIndex(COL_TEXT)
@@ -50,7 +48,6 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
         if(cursor.moveToFirst()){
             do {
                 val note=Note(
-                    cursor.getInt(idIndex),
                     cursor.getString(titleIndex),
                     cursor.getString(categoryIndex),
                     cursor.getString(textIndex),
@@ -91,14 +88,15 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
         contentValues.put(COL_CATEGORY,note.category.lowercase())
         contentValues.put(COL_TEXT,note.text)
         contentValues.put(COL_IMAGE,note.image)
-        db.update(TABLE_NOTES,contentValues,"$COL_ID=${note.id}",null)
+        db.update(TABLE_NOTES,contentValues,"$COL_TITLE='${note.title}' AND $COL_CATEGORY ='${note.category}' ",null)
     }
 
     fun deleteNote(note:Note){
         val db=this.writableDatabase
         val contentValues=ContentValues()
-        contentValues.put(COL_ID,note.id)
-        db.delete(TABLE_NOTES,"$COL_ID=${note.id}",null)
+        contentValues.put(COL_TITLE,note.title)
+        contentValues.put(COL_CATEGORY,note.category)
+        db.delete(TABLE_NOTES,"$COL_TITLE='${note.title}' AND $COL_CATEGORY ='${note.category}' ",null)
     }
     fun destroy(){
         val db=this.writableDatabase
