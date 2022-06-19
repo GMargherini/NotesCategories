@@ -8,5 +8,6 @@ data class Note(
     var text:String,
     var image: String
 ) {
-
+    constructor(title:String) : this(0,title,"category","","")
+    constructor(title: String,category: String):this(0,title,category,"","")
 }
