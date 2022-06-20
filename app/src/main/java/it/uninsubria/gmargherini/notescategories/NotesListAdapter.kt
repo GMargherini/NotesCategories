@@ -34,9 +34,7 @@ class NotesListAdapter(private val context: Context, private val notesList:List<
             newView=LayoutInflater.from(context).inflate(R.layout.layout_row_item,parent,false)
         val note = notesList[pos]
         try {
-
             Glide.with(newView!!.context).load(note.image).into(newView.findViewById(R.id.image_view))
-            Log.d("******",note.image)
         }catch (e:Exception){
             newView!!.findViewById<ImageView>(R.id.image_view)
         }

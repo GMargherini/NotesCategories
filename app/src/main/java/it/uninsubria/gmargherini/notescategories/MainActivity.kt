@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     finish()
                     startActivity(intent)
                     checkCategories()
-                    showNotes(currentCategory)
+                    showNotes(note.category)
                 }
             return true
         }
