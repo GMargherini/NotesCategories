@@ -21,14 +21,15 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
     override fun onCreate(db: SQLiteDatabase?) {
         val createTableNotes=
             "CREATE TABLE " + TABLE_NOTES + "("+
-                COL_TITLE + " VARCHAR(128)," +
-                COL_CATEGORY + " VARCHAR(128),"+
+                COL_TITLE + " VARCHAR(128) NOT NULL," +
+                COL_CATEGORY + " VARCHAR(128) NOT NULL,"+
                 COL_TEXT + " TEXT,"+
                 COL_IMAGE + " VARCHAR(256),"+
                 "PRIMARY KEY($COL_TITLE,$COL_CATEGORY)"+
             ")"
         db?.execSQL(createTableNotes)
     }
+
 
     override fun onUpgrade(db: SQLiteDatabase?, newVersion: Int, oldVersion: Int) {
         //TODO("Not yet implemented")
@@ -57,6 +58,25 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
             }while(cursor.moveToNext())
         }
         return list
+    }
+    fun readNote(title:String,category:String):Note{
+        val db=this.readableDatabase
+        var note:Note=Note()
+        val query= "$COL_TITLE = '$title' AND $COL_CATEGORY = '${category.lowercase()}'"
+        val cursor=db.query(TABLE_NOTES,null,query,null,null,null,null)
+        val titleIndex= cursor.getColumnIndex(COL_TITLE)
+        val categoryIndex= cursor.getColumnIndex(COL_CATEGORY)
+        val textIndex= cursor.getColumnIndex(COL_TEXT)
+        val imageIndex= cursor.getColumnIndex(COL_IMAGE)
+        if(cursor.moveToFirst()){
+            note=Note(
+                cursor.getString(titleIndex),
+                cursor.getString(categoryIndex),
+                cursor.getString(textIndex),
+                cursor.getString(imageIndex)
+            )
+        }
+        return note
     }
     fun readCategories():ArrayList<String>{
         val list:ArrayList<String> = ArrayList()
@@ -97,6 +117,25 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
         contentValues.put(COL_TITLE,note.title)
         contentValues.put(COL_CATEGORY,note.category)
         db.delete(TABLE_NOTES,"$COL_TITLE='${note.title}' AND $COL_CATEGORY ='${note.category}' ",null)
+    }
+    private fun printTable(){
+        val db=this.readableDatabase
+        val cursor=db.rawQuery("SELECT * FROM $TABLE_NOTES",null)
+        val titleIndex= cursor.getColumnIndex(COL_TITLE)
+        val categoryIndex= cursor.getColumnIndex(COL_CATEGORY)
+        val textIndex= cursor.getColumnIndex(COL_TEXT)
+        val imageIndex= cursor.getColumnIndex(COL_IMAGE)
+        if(cursor.moveToFirst()){
+            do {
+                val note=Note(
+                    cursor.getString(titleIndex),
+                    cursor.getString(categoryIndex),
+                    cursor.getString(textIndex),
+                    cursor.getString(imageIndex)
+                )
+                println(note)
+            }while(cursor.moveToNext())
+        }
     }
     fun destroy(){
         val db=this.writableDatabase

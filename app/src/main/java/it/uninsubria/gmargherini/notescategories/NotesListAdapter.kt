@@ -41,20 +41,6 @@ class NotesListAdapter(private val context: Context, private val notesList:List<
 
         newView!!.findViewById<TextView>(R.id.tv_title).text=note.title
         newView.findViewById<TextView>(R.id.tv_text).text=note.text
-        /*if(notesList.isNotEmpty()) {
-            for(i in notesList.indices){
-                val item=HashMap<String,Any>()
-                item["title"]=notes[i].title
-                item["text"]=notes[i].text
-                item["image"]=notes[i].image
-
-                data.add(item)
-            }
-            binding.listView.adapter = SimpleAdapter(
-                this, data, R.layout.layout_row_item,
-                arrayOf("title","text","image"), intArrayOf(R.id.tv_title,R.id.tv_text,R.id.image_view)
-            )
-        }*/
         return newView
     }
 }
