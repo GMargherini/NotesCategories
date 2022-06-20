@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
     }
 
     private inner class GestureListener:GestureDetector.SimpleOnGestureListener(){
+        val DELETE_THRESHOLD=100
         override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
             var note:Note=Note()
             try {
@@ -137,9 +138,12 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     return true
                 }
 
-                if(distanceX <0){
+                if(abs(distanceX) >DELETE_THRESHOLD){
                     currentCategory=(note).category
                     dbh.deleteNote(note)
+                    finish()
+                    startActivity(intent)
+                    checkCategories()
                     showNotes(currentCategory)
                 }
             return true
@@ -170,10 +174,9 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                         dbh.insertNote(newNote)
                         dbh.deleteNote(oldNote)
                     }
-
-                    checkCategories()
                     showNotes(newNote.category)
                     dialog.cancel()
+
                 }
                 .setNegativeButton("ANNULLA",DialogInterface.OnClickListener{ dialog, which ->
                     dialog.cancel() })

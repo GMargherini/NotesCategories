@@ -2,6 +2,7 @@ package it.uninsubria.gmargherini.notescategories
 
 import android.app.ActionBar
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import java.lang.Exception
 
 class NotesListAdapter(private val context: Context, private val notesList:List<Note>): BaseAdapter() {
@@ -32,13 +34,12 @@ class NotesListAdapter(private val context: Context, private val notesList:List<
             newView=LayoutInflater.from(context).inflate(R.layout.layout_row_item,parent,false)
         val note = notesList[pos]
         try {
-            val imageView=newView?.findViewById<ImageView>(R.id.image_view)!!
-            imageView.layoutParams= ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT)
-            Glide.with(context).load(note.image).into(imageView)
+
+            Glide.with(newView!!.context).load(note.image).into(newView.findViewById(R.id.image_view))
+            Log.d("******",note.image)
         }catch (e:Exception){
             newView!!.findViewById<ImageView>(R.id.image_view)
         }
-
         newView!!.findViewById<TextView>(R.id.tv_title).text=note.title
         newView.findViewById<TextView>(R.id.tv_text).text=note.text
         return newView

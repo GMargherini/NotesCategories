@@ -1,17 +1,13 @@
 package it.uninsubria.gmargherini.notescategories
 
-import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.text.Editable
-import android.widget.ImageView
-import androidx.core.net.toUri
+import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import it.uninsubria.gmargherini.notescategories.databinding.ActivityEditorBinding
-import java.io.FileNotFoundException
 import java.lang.Exception
 
 class EditorActivity : AppCompatActivity() {
@@ -32,13 +28,25 @@ class EditorActivity : AppCompatActivity() {
             }
         }
         setView(note)
-
+        val resultLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { result ->
+            note.image = result.toString()
+            dbh.updateNotes(note)
+            note=dbh.readNote(note.title,note.category)
+            setView(note)
+        }
+        binding.btnAddImage.setOnClickListener {
+            resultLauncher.launch("*/*")
+        }
     }
 
     override fun onBackPressed() {
         saveNote()
         super.onBackPressed()
+    }
 
+    override fun onDestroy() {
+        saveNote()
+        super.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
@@ -50,19 +58,18 @@ class EditorActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         val values:ArrayList<String>? = savedInstanceState.getStringArrayList("note")
-        note=Note(values!![0],values!![1],values!![2],values!![3])
+        note=Note(values!![0],values[1],values[2],values[3])
     }
     private fun setView(note:Note){
         binding.tvTitle.text=note.title
         binding.tvCategory.text=note.category
         binding.etText.setText(note.text)
-        val imageView=ImageView(this)
         try {
-            Glide.with(this).load(note.image).into(imageView)
-        }catch (e:Exception){
-            Glide.with(this).load("app/src/main/res/drawable-v24/kotlin_icon.png").into(imageView)
-        }
-        binding.clOuter.addView(imageView)
+            if(note.image!="") {
+                Glide.with(binding.imageView.context).load(note.image).into(binding.imageView)
+            }
+        }catch (e:Exception){}
+
     }
     private fun saveNote():ArrayList<String>{
         binding.etText.clearFocus()
