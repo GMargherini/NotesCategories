@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.core.view.children
 import it.uninsubria.gmargherini.notescategories.databinding.ActivityMainBinding
 import it.uninsubria.gmargherini.notescategories.databinding.AlertDialogBinding
 import java.lang.Exception
@@ -33,8 +34,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
         val view=binding.root
         setContentView(view)
         detector=GestureDetector(this, GestureListener())
-        checkCategories()
-
+        //checkCategories()
         binding.floatingActionButton.setOnClickListener {
             val layout = AlertDialogBinding.inflate(layoutInflater)
             AlertDialog.Builder(this)
@@ -46,9 +46,15 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     if(notes.contains(note)){
                         Toast.makeText(this,"La nota esiste già",Toast.LENGTH_SHORT).show()
                     }
+                    else if (note.title==""){
+                        Toast.makeText(this,"Inserire un titolo",Toast.LENGTH_SHORT).show()
+                    }
+                    else if (note.category==""){
+                        Toast.makeText(this,"inserire una categoria",Toast.LENGTH_SHORT).show()
+                    }
                     else{
                         dbh.insertNote(note)
-                        checkCategories()
+                        onStart()
                     }
                     showNotes(note.category)
                     dialog.cancel()
@@ -69,8 +75,8 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
         val prev=categories
         categories=dbh.readCategories().distinct().toList()
         if(categories.isNotEmpty()) {
-            for (i in categories) {
-                if (i != "" && !prev.contains(i)) {
+            for (category in categories) {
+                if (category != "" && !prev.contains(category)) {
                     val button = Button(this)
                     button.layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -79,17 +85,29 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     (button.layoutParams as LinearLayout.LayoutParams).setMargins(0,0,24,0)
                     button.setTextColor(resources.getColor(R.color.false_white,theme))
                     button.setBackgroundResource(R.drawable.category_button)
-                    button.text = i
+                    button.text = category
                     button.setOnClickListener {
-                        showNotes(i)
-                        currentCategory=i
+                        showNotes(category)
+                        currentCategory=category
                     }
                     categoryButtons.add(button)
                     binding.linearLayout.addView(button)
                 }
+
+            }
+            for(category in prev) {
+                if (!categories.contains(category)){
+                    for (button in binding.linearLayout.children) {
+                        if ((button as Button).text.toString().lowercase()==category ) {
+                            binding.linearLayout.removeView(button)
+                            break
+                        }
+                    }
+                }
             }
         }
     }
+
     private fun showNotes(category:String){
         notes=dbh.readNotes(category)
         binding.listView.adapter=NotesListAdapter(this,notes)
@@ -103,6 +121,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
             }
         }
     }
+
     override fun onTouch(view:View, event: MotionEvent?): Boolean {
         detector.onTouchEvent(event)
         return true
@@ -110,8 +129,10 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
 
     override fun onStart() {
         super.onStart()
-        if (dbh.readCategories().isNotEmpty())
-            currentCategory=dbh.readCategories()[0]
+        val categories=dbh.readCategories()
+        binding.constraintLayout.invalidate()
+        if (categories.isNotEmpty())
+            currentCategory=categories[0]
         checkCategories()
         if (currentCategory!="")
             showNotes(currentCategory)
@@ -154,32 +175,31 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     return true
                 }
 
-                if(abs(distanceX) >DELETE_THRESHOLD){
+                if(abs(distanceX) > DELETE_THRESHOLD){
                     currentCategory=(note).category
                     dbh.deleteNote(note)
-                    finish()
-                    startActivity(intent)
+                    Thread.sleep(100)
+                    onStart()
                 }
             return true
         }
 
         override fun onLongPress(p0: MotionEvent?) {
             val layout=AlertDialogBinding.inflate(layoutInflater)
-            var note:Note=Note()
+            var oldNote=Note()
             try {
-                note = binding.listView.adapter.getItem(
+                oldNote = binding.listView.adapter.getItem(
                     binding.listView.pointToPosition(
                         p0!!.x.roundToInt(),
                         p0.y.roundToInt()
                     )
                 ) as Note
             }catch (e:Exception){}
-            if(note!=Note()){
+            if(oldNote!=Note()){
                 AlertDialog.Builder(this@MainActivity,)
                     .setTitle("Modifica nota")
                     .setView(layout.root)
                     .setPositiveButton("MODIFICA") { dialog, which ->
-                        val oldNote = note
                         val newNote=Note(layout.etTitolo.text.toString(), layout.etCategoria.text.toString(), oldNote.text, oldNote.image)
                         notes=dbh.readNotes(newNote.category)
                         if(notes.contains(newNote)){
@@ -189,14 +209,14 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                             dbh.insertNote(newNote)
                             dbh.deleteNote(oldNote)
                         }
-                        checkCategories()
-                        showNotes(newNote.category)
                         dialog.cancel()
-
+                        onStart()
                     }
                     .setNegativeButton("ANNULLA",DialogInterface.OnClickListener{ dialog, which ->
                         dialog.cancel() })
                     .show()
+                layout.etTitolo.setText(oldNote.title)
+                layout.etCategoria.setText(oldNote.category)
             }
 
         }

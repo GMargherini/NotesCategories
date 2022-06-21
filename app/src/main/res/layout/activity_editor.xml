@@ -77,7 +77,7 @@
                 <ImageView
                     android:id="@+id/image_view"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content" />
 
                 <EditText
                     android:id="@+id/et_text"

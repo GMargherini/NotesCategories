@@ -49,6 +49,11 @@ class EditorActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    override fun onPause() {
+        saveNote()
+        super.onPause()
+    }
+
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         outState.putStringArrayList("note",saveNote())
         super.onSaveInstanceState(outState, outPersistentState)
@@ -64,12 +69,9 @@ class EditorActivity : AppCompatActivity() {
         binding.tvTitle.text=note.title
         binding.tvCategory.text=note.category
         binding.etText.setText(note.text)
-        try {
-            if(note.image!="") {
-                Glide.with(binding.imageView.context).load(note.image).into(binding.imageView)
-            }
-        }catch (e:Exception){}
-
+        if(note.image!="") {
+            Glide.with(binding.imageView.context).load(note.image).into(binding.imageView)
+        }
     }
     private fun saveNote():ArrayList<String>{
         binding.etText.clearFocus()
