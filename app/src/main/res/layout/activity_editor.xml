@@ -4,7 +4,8 @@
     android:id="@+id/cl_outer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/false_white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_inner"
@@ -26,6 +27,7 @@
             android:text="title"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:textColor="@color/black"
             app:layout_constraintBottom_toTopOf="@+id/tv_category"
             app:layout_constraintEnd_toStartOf="@+id/btn_add_image"
             app:layout_constraintStart_toStartOf="parent"
@@ -37,6 +39,7 @@
             android:layout_height="0dp"
             android:gravity="center"
             android:text="category"
+            android:textColor="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_add_image"
             app:layout_constraintStart_toStartOf="parent"
@@ -48,7 +51,7 @@
             android:layout_height="match_parent"
             android:layout_marginHorizontal="8dp"
             android:foreground="@drawable/ic_baseline_image_24"
-            android:foregroundTint="@color/white"
+            android:foregroundTint="@color/false_white"
             android:padding="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1"
@@ -80,6 +83,7 @@
                     android:id="@+id/et_text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:textColor="@color/black"
                     android:background="@null"
                     android:gravity="start|top"
                     android:inputType="textMultiLine"

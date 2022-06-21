@@ -1,21 +1,18 @@
 package it.uninsubria.gmargherini.notescategories
 
 import android.app.AlertDialog
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Color
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
-import androidx.core.view.children
+import androidx.annotation.RequiresApi
 import it.uninsubria.gmargherini.notescategories.databinding.ActivityMainBinding
 import it.uninsubria.gmargherini.notescategories.databinding.AlertDialogBinding
-import it.uninsubria.gmargherini.notescategories.databinding.LayoutRowItemBinding
 import java.lang.Exception
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -28,6 +25,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
     private var notes:List<Note> = ArrayList()
     private var categories:List<String> = ArrayList()
     private var currentCategory:String=""
+    private var categoryButtons:ArrayList<Button> = ArrayList()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //dbh.destroy()
@@ -79,13 +77,14 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                         LinearLayout.LayoutParams.MATCH_PARENT
                     )
                     (button.layoutParams as LinearLayout.LayoutParams).setMargins(0,0,24,0)
-                    button.setBackgroundResource(R.color.purple_light)
-                    button.setTextColor(Color.WHITE)
+                    button.setTextColor(resources.getColor(R.color.false_white,theme))
+                    button.setBackgroundResource(R.drawable.category_button)
                     button.text = i
                     button.setOnClickListener {
                         showNotes(i)
                         currentCategory=i
                     }
+                    categoryButtons.add(button)
                     binding.linearLayout.addView(button)
                 }
             }
@@ -94,12 +93,29 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
     private fun showNotes(category:String){
         notes=dbh.readNotes(category)
         binding.listView.adapter=NotesListAdapter(this,notes)
+        if (categoryButtons.isNotEmpty()) {
+            for (button in categoryButtons) {
+                if (button.text.toString() == category) {
+                    button.setBackgroundResource(R.drawable.category_button_pressed)
+                } else {
+                    button.setBackgroundResource(R.drawable.category_button)
+                }
+            }
+        }
     }
     override fun onTouch(view:View, event: MotionEvent?): Boolean {
         detector.onTouchEvent(event)
         return true
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (dbh.readCategories().isNotEmpty())
+            currentCategory=dbh.readCategories()[0]
+        checkCategories()
+        if (currentCategory!="")
+            showNotes(currentCategory)
+    }
     private inner class GestureListener:GestureDetector.SimpleOnGestureListener(){
         val DELETE_THRESHOLD=100
         override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
@@ -143,8 +159,6 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     dbh.deleteNote(note)
                     finish()
                     startActivity(intent)
-                    checkCategories()
-                    showNotes(note.category)
                 }
             return true
         }
@@ -160,27 +174,31 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     )
                 ) as Note
             }catch (e:Exception){}
-            AlertDialog.Builder(this@MainActivity,)
-                .setTitle("Modifica nota")
-                .setView(layout.root)
-                .setPositiveButton("MODIFICA") { dialog, which ->
-                    val oldNote = note
-                    val newNote=Note(layout.etTitolo.text.toString(), layout.etCategoria.text.toString(), oldNote.text, oldNote.image)
-                    notes=dbh.readNotes(newNote.category)
-                    if(notes.contains(newNote)){
-                        Toast.makeText(this@MainActivity,"La nota esiste già",Toast.LENGTH_SHORT).show()
-                    }
-                    else{
-                        dbh.insertNote(newNote)
-                        dbh.deleteNote(oldNote)
-                    }
-                    showNotes(newNote.category)
-                    dialog.cancel()
+            if(note!=Note()){
+                AlertDialog.Builder(this@MainActivity,)
+                    .setTitle("Modifica nota")
+                    .setView(layout.root)
+                    .setPositiveButton("MODIFICA") { dialog, which ->
+                        val oldNote = note
+                        val newNote=Note(layout.etTitolo.text.toString(), layout.etCategoria.text.toString(), oldNote.text, oldNote.image)
+                        notes=dbh.readNotes(newNote.category)
+                        if(notes.contains(newNote)){
+                            Toast.makeText(this@MainActivity,"La nota esiste già",Toast.LENGTH_SHORT).show()
+                        }
+                        else{
+                            dbh.insertNote(newNote)
+                            dbh.deleteNote(oldNote)
+                        }
+                        checkCategories()
+                        showNotes(newNote.category)
+                        dialog.cancel()
 
-                }
-                .setNegativeButton("ANNULLA",DialogInterface.OnClickListener{ dialog, which ->
-                    dialog.cancel() })
-                .show()
+                    }
+                    .setNegativeButton("ANNULLA",DialogInterface.OnClickListener{ dialog, which ->
+                        dialog.cancel() })
+                    .show()
+            }
+
         }
     }
 }

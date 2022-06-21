@@ -7,12 +7,16 @@
         android:id="@+id/et_titolo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:inputType="text"
         android:hint="Titolo"
         android:layout_margin="16dp"/>
     <EditText
         android:id="@+id/et_categoria"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:inputType="text"
         android:hint="Categoria"
         android:layout_margin="16dp"/>
 </LinearLayout>
