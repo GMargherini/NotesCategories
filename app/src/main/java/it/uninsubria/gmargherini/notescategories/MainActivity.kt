@@ -3,14 +3,12 @@ package it.uninsubria.gmargherini.notescategories
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import it.uninsubria.gmargherini.notescategories.databinding.ActivityMainBinding
 import it.uninsubria.gmargherini.notescategories.databinding.AlertDialogBinding
@@ -21,7 +19,7 @@ import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity(), View.OnTouchListener{
     private lateinit var binding:ActivityMainBinding
-    private lateinit var detector: android.view.GestureDetector
+    private lateinit var detector: GestureDetector
     private val dbh:DBHelper= DBHelper(this)
     private var notes:List<Note> = ArrayList()
     private var categories:List<String> = ArrayList()
@@ -29,18 +27,16 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
     private var categoryButtons:ArrayList<Button> = ArrayList()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //dbh.destroy()
         binding=ActivityMainBinding.inflate(layoutInflater)
         val view=binding.root
         setContentView(view)
         detector=GestureDetector(this, GestureListener())
-        //checkCategories()
         binding.floatingActionButton.setOnClickListener {
             val layout = AlertDialogBinding.inflate(layoutInflater)
             AlertDialog.Builder(this)
                 .setTitle("Nuova nota")
                 .setView(layout.root)
-                .setPositiveButton("CREA"){ dialog, which ->
+                .setPositiveButton("CREA"){ dialog, _ ->
                     val note=Note(layout.etTitolo.text.toString(), layout.etCategoria.text.toString())
                     notes=dbh.readNotes(note.category)
                     if(notes.contains(note)){
@@ -59,8 +55,9 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     showNotes(note.category)
                     dialog.cancel()
                 }
-                .setNegativeButton("ANNULLA",DialogInterface.OnClickListener{ dialog, _ ->
-                    dialog.cancel() })
+                .setNegativeButton("ANNULLA") { dialog, _ ->
+                    dialog.cancel()
+                }
                 .show()
         }
         binding.listView.setOnTouchListener(this@MainActivity)
@@ -140,7 +137,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
     private inner class GestureListener:GestureDetector.SimpleOnGestureListener(){
         val DELETE_THRESHOLD=100
         override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-            var note:Note=Note()
+            val note:Note
             try {
                 note = binding.listView.adapter.getItem(
                     binding.listView.pointToPosition(
@@ -163,7 +160,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
             distanceX: Float,
             distanceY: Float
         ): Boolean {
-            var note:Note=Note()
+            val note:Note
                 try {
                     note = binding.listView.adapter.getItem(
                         binding.listView.pointToPosition(
@@ -196,14 +193,20 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                 ) as Note
             }catch (e:Exception){}
             if(oldNote!=Note()){
-                AlertDialog.Builder(this@MainActivity,)
+                AlertDialog.Builder(this@MainActivity)
                     .setTitle("Modifica nota")
                     .setView(layout.root)
-                    .setPositiveButton("MODIFICA") { dialog, which ->
+                    .setPositiveButton("MODIFICA") { dialog, _ ->
                         val newNote=Note(layout.etTitolo.text.toString(), layout.etCategoria.text.toString(), oldNote.text, oldNote.image)
                         notes=dbh.readNotes(newNote.category)
                         if(notes.contains(newNote)){
                             Toast.makeText(this@MainActivity,"La nota esiste già",Toast.LENGTH_SHORT).show()
+                        }
+                        else if (newNote.title==""){
+                            Toast.makeText(this@MainActivity,"Inserire un titolo",Toast.LENGTH_SHORT).show()
+                        }
+                        else if (newNote.category==""){
+                            Toast.makeText(this@MainActivity,"inserire una categoria",Toast.LENGTH_SHORT).show()
                         }
                         else{
                             dbh.insertNote(newNote)
@@ -212,8 +215,9 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                         dialog.cancel()
                         onStart()
                     }
-                    .setNegativeButton("ANNULLA",DialogInterface.OnClickListener{ dialog, which ->
-                        dialog.cancel() })
+                    .setNegativeButton("ANNULLA") { dialog, _ ->
+                        dialog.cancel()
+                    }
                     .show()
                 layout.etTitolo.setText(oldNote.title)
                 layout.etCategoria.setText(oldNote.category)

@@ -3,15 +3,12 @@ package it.uninsubria.gmargherini.notescategories
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import it.uninsubria.gmargherini.notescategories.databinding.ActivityEditorBinding
-import java.lang.Exception
 
 class EditorActivity : AppCompatActivity() {
-    lateinit var binding: ActivityEditorBinding
+    private lateinit var binding: ActivityEditorBinding
     private val dbh=DBHelper(this)
     lateinit var note:Note
 

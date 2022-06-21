@@ -1,8 +1,5 @@
 package it.uninsubria.gmargherini.notescategories
 
-import android.net.Uri
-
-
 data class Note(
     var title:String,
     var category:String,
@@ -12,4 +9,14 @@ data class Note(
     constructor():this("title")
     constructor(title:String) : this(title,"category","","")
     constructor(title: String,category: String):this(title,category,"", "")
+
+    override fun equals(other: Any?): Boolean {
+        return this.title==(other as Note).title && this.category==other.category
+    }
+
+    override fun hashCode(): Int {
+        var result = title.hashCode()
+        result = 31 * result + category.hashCode()
+        return result
+    }
 }

@@ -7,15 +7,15 @@ import android.database.sqlite.SQLiteOpenHelper
 import kotlin.collections.ArrayList
 
 
-class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION){
+class DBHelper(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION){
     companion object{
         const val DATABASE_NAME: String="notesApp.db"
         const val DATABASE_VERSION: Int=1
-        val TABLE_NOTES="Notes"
-        val COL_TITLE="title"
-        val COL_TEXT="text"
-        val COL_IMAGE="image"
-        val COL_CATEGORY="category"
+        const val TABLE_NOTES="Notes"
+        const val COL_TITLE="title"
+        const val COL_TEXT="text"
+        const val COL_IMAGE="image"
+        const val COL_CATEGORY="category"
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -32,7 +32,7 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
 
 
     override fun onUpgrade(db: SQLiteDatabase?, newVersion: Int, oldVersion: Int) {
-        db!!.execSQL("DROP TABLE IF EXISTS "+TABLE_NOTES)
+        db!!.execSQL("DROP TABLE IF EXISTS $TABLE_NOTES")
         onCreate(db)
     }
 
@@ -56,6 +56,7 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
                 list.add(note)
             } while (cursor.moveToNext())
         }
+        cursor.close()
         return list
     }
     fun readNote(title:String,category:String):Note{
@@ -75,6 +76,7 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
                 cursor.getString(imageIndex)
             )
         }
+        cursor.close()
         return note
     }
     fun readCategories():ArrayList<String>{
@@ -89,6 +91,7 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
                 list.add(category)
             } while (cursor.moveToNext())
         }
+        cursor.close()
         return list
     }
     fun insertNote(note:Note){
@@ -125,29 +128,5 @@ class DBHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_NAME, n
             "$COL_TITLE='${note.title}' AND $COL_CATEGORY ='${note.category}' ",
             null
         )
-    }
-    private fun printTable(){
-        val db=this.readableDatabase
-        val cursor=db.rawQuery("SELECT * FROM $TABLE_NOTES",null)
-        val titleIndex= cursor.getColumnIndex(COL_TITLE)
-        val categoryIndex= cursor.getColumnIndex(COL_CATEGORY)
-        val textIndex= cursor.getColumnIndex(COL_TEXT)
-        val imageIndex= cursor.getColumnIndex(COL_IMAGE)
-        if(cursor.moveToFirst()){
-            do {
-                val note=Note(
-                    cursor.getString(titleIndex),
-                    cursor.getString(categoryIndex),
-                    cursor.getString(textIndex),
-                    cursor.getString(imageIndex)
-                )
-                println(note)
-            }while(cursor.moveToNext())
-        }
-    }
-    fun destroy(){
-        val db=this.writableDatabase
-        db!!.execSQL("DROP TABLE IF EXISTS "+TABLE_NOTES)
-        onCreate(db)
     }
 }
