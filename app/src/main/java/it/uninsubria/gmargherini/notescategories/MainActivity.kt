@@ -90,15 +90,14 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     categoryButtons.add(button)
                     binding.linearLayout.addView(button)
                 }
-
             }
-            for(category in prev) {
-                if (!categories.contains(category)){
-                    for (button in binding.linearLayout.children) {
-                        if ((button as Button).text.toString().lowercase()==category ) {
-                            binding.linearLayout.removeView(button)
-                            break
-                        }
+        }
+        for(category in prev) {
+            if (!categories.contains(category)){
+                for (button in binding.linearLayout.children) {
+                    if ((button as Button).text.toString().lowercase()==category ) {
+                        binding.linearLayout.removeView(button)
+                        break
                     }
                 }
             }
@@ -127,7 +126,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
     override fun onStart() {
         super.onStart()
         val categories=dbh.readCategories()
-        binding.constraintLayout.invalidate()
+        //binding.constraintLayout.invalidate()
         if (categories.isNotEmpty())
             currentCategory=categories[0]
         checkCategories()
