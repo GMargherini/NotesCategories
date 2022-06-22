@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Notes Categories</string>
+    <string name="new_note">Nuova nota</string>
+    <string name="create">CREA</string>
+    <string name="note_already_exists">La nota esiste già</string>
+    <string name="insert_title">Inserire un titolo</string>
+    <string name="insert_category">Inserire una categoria</string>
+    <string name="cancel">ANNULLA</string>
+    <string name="edit_note">Modifica nota</string>
+    <string name="edit">MODIFICA</string>
+</resources>

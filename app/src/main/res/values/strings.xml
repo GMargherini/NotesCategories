@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Notes Categories</string>
+    <string name="create">CREATE</string>
+    <string name="new_note">New note</string>
+    <string name="note_already_exists">The note already exists</string>
+    <string name="insert_title">Insert a title</string>
+    <string name="insert_category">Insert a category</string>
+    <string name="cancel">CANCEL</string>
+    <string name="edit_note">Edit note</string>
+    <string name="edit">EDIT</string>
 </resources>

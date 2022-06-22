@@ -1,7 +1,6 @@
 package it.uninsubria.gmargherini.notescategories
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -34,19 +33,19 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
         binding.floatingActionButton.setOnClickListener {
             val layout = AlertDialogBinding.inflate(layoutInflater)
             AlertDialog.Builder(this)
-                .setTitle("Nuova nota")
+                .setTitle(getString(R.string.new_note))
                 .setView(layout.root)
-                .setPositiveButton("CREA"){ dialog, _ ->
+                .setPositiveButton(getString(R.string.create)){ dialog, _ ->
                     val note=Note(layout.etTitolo.text.toString(), layout.etCategoria.text.toString())
                     notes=dbh.readNotes(note.category)
                     if(notes.contains(note)){
-                        Toast.makeText(this,"La nota esiste già",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this,getString(R.string.note_already_exists),Toast.LENGTH_SHORT).show()
                     }
                     else if (note.title==""){
-                        Toast.makeText(this,"Inserire un titolo",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this,getString(R.string.insert_title),Toast.LENGTH_SHORT).show()
                     }
                     else if (note.category==""){
-                        Toast.makeText(this,"inserire una categoria",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this,getString(R.string.insert_category),Toast.LENGTH_SHORT).show()
                     }
                     else{
                         dbh.insertNote(note)
@@ -55,7 +54,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                     showNotes(note.category)
                     dialog.cancel()
                 }
-                .setNegativeButton("ANNULLA") { dialog, _ ->
+                .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                     dialog.cancel()
                 }
                 .show()
@@ -193,19 +192,19 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
             }catch (e:Exception){}
             if(oldNote!=Note()){
                 AlertDialog.Builder(this@MainActivity)
-                    .setTitle("Modifica nota")
+                    .setTitle(getString(R.string.edit_note))
                     .setView(layout.root)
-                    .setPositiveButton("MODIFICA") { dialog, _ ->
+                    .setPositiveButton(getString(R.string.edit)) { dialog, _ ->
                         val newNote=Note(layout.etTitolo.text.toString(), layout.etCategoria.text.toString(), oldNote.text, oldNote.image)
                         notes=dbh.readNotes(newNote.category)
                         if(notes.contains(newNote)){
-                            Toast.makeText(this@MainActivity,"La nota esiste già",Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MainActivity,getString(R.string.note_already_exists),Toast.LENGTH_SHORT).show()
                         }
                         else if (newNote.title==""){
-                            Toast.makeText(this@MainActivity,"Inserire un titolo",Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MainActivity,getString(R.string.insert_title),Toast.LENGTH_SHORT).show()
                         }
                         else if (newNote.category==""){
-                            Toast.makeText(this@MainActivity,"inserire una categoria",Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MainActivity,getString(R.string.insert_category),Toast.LENGTH_SHORT).show()
                         }
                         else{
                             dbh.insertNote(newNote)
@@ -214,7 +213,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
                         dialog.cancel()
                         onStart()
                     }
-                    .setNegativeButton("ANNULLA") { dialog, _ ->
+                    .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                         dialog.cancel()
                     }
                     .show()
