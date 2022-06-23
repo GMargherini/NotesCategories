@@ -7,12 +7,12 @@ import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.TranslateAnimation
 import android.widget.*
 import androidx.core.view.children
 import it.uninsubria.gmargherini.notescategories.databinding.ActivityMainBinding
 import it.uninsubria.gmargherini.notescategories.databinding.AlertDialogBinding
 import java.lang.Exception
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
@@ -125,7 +125,6 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
     override fun onStart() {
         super.onStart()
         val categories=dbh.readCategories()
-        //binding.constraintLayout.invalidate()
         if (categories.isNotEmpty())
             currentCategory=categories[0]
         checkCategories()
@@ -159,21 +158,20 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
             distanceY: Float
         ): Boolean {
             val note:Note
+            val view:Int
                 try {
-                    note = binding.listView.adapter.getItem(
-                        binding.listView.pointToPosition(
-                            e1!!.x.roundToInt(),
-                            e1.y.roundToInt()
-                        )
-                    ) as Note
+                    view=binding.listView.pointToPosition(e1!!.x.roundToInt(), e1.y.roundToInt())
+                    note = binding.listView.adapter.getItem(view) as Note
                 }catch (e:Exception){
                     return true
                 }
 
-                if(abs(distanceX) > DELETE_THRESHOLD){
+                if(distanceX < -DELETE_THRESHOLD){
+                    binding.listView.getChildAt(view).animation=TranslateAnimation(0.toFloat(),400.toFloat(),0.toFloat(),0.toFloat())
+                    binding.listView.getChildAt(view).animation.duration=200
+                    binding.listView.getChildAt(view).animation.start()
                     currentCategory=(note).category
                     dbh.deleteNote(note)
-                    Thread.sleep(100)
                     onStart()
                 }
             return true
