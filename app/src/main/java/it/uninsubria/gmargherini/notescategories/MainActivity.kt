@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.*
 import androidx.core.view.children
@@ -124,15 +125,26 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
 
     override fun onStart() {
         super.onStart()
-        val categories=dbh.readCategories()
-        if (categories.isNotEmpty())
-            currentCategory=categories[0]
+        val categories = dbh.readCategories()
+        if (categories.isNotEmpty() ){
+            if (!categories.contains(currentCategory))
+                currentCategory = categories[0]
+        }
         checkCategories()
         if (currentCategory!="")
             showNotes(currentCategory)
     }
     private inner class GestureListener:GestureDetector.SimpleOnGestureListener(){
         val DELETE_THRESHOLD=100
+        inner class DeleteAnimationListener(val note:Note):Animation.AnimationListener{
+            override fun onAnimationStart(animation: Animation?) {}
+            override fun onAnimationEnd(p0: Animation?) {
+                currentCategory=(note).category
+                dbh.deleteNote(note)
+                onStart()
+            }
+            override fun onAnimationRepeat(p0: Animation?) {}
+        }
         override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
             val note:Note
             try {
@@ -159,20 +171,21 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener{
         ): Boolean {
             val note:Note
             val view:Int
-                try {
-                    view=binding.listView.pointToPosition(e1!!.x.roundToInt(), e1.y.roundToInt())
-                    note = binding.listView.adapter.getItem(view) as Note
-                }catch (e:Exception){
-                    return true
-                }
-
+            try {
+                view=binding.listView.pointToPosition(e1!!.x.roundToInt(), e1.y.roundToInt())
+                note = binding.listView.adapter.getItem(view) as Note
+            }catch (e:Exception){
+                return true
+            }
+            val animationListener=DeleteAnimationListener(note)
                 if(distanceX < -DELETE_THRESHOLD){
-                    binding.listView.getChildAt(view).animation=TranslateAnimation(0.toFloat(),400.toFloat(),0.toFloat(),0.toFloat())
-                    binding.listView.getChildAt(view).animation.duration=200
-                    binding.listView.getChildAt(view).animation.start()
-                    currentCategory=(note).category
-                    dbh.deleteNote(note)
-                    onStart()
+                    val item=binding.listView.getChildAt(view)
+                    item.animation=TranslateAnimation(0f,400f,0f,0f)
+                    item.animation.duration=300
+                    item.animation.setAnimationListener(animationListener)
+                    item.requestLayout()
+                    item.animation.start()
+
                 }
             return true
         }
